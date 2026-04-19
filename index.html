@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OCR Scanner</title>
+
+  <link rel="manifest" href="manifest.json">
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #1e3a8a;
+      color: white;
+    }
+
+    video {
+      width: 300px;
+      margin-top: 20px;
+      border-radius: 10px;
+    }
+
+    canvas {
+      display: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 8px;
+      border: none;
+      background: white;
+      color: #1e3a8a;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>OCR Scanner</h1>
+
+  <video id="video" autoplay></video>
+  <canvas id="canvas"></canvas>
+
+  <br>
+  <button onclick="startCamera()">Avvia Camera</button>
+  <button onclick="scanText()">Scansiona</button>
+
+  <h2 id="result"></h2>
+
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    async function startCamera() {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" }
+      });
+      video.srcObject = stream;
+    }
+
+    async function scanText() {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+
+      document.getElementById("result").innerText = "Scanning...";
+
+      const { data: { text } } = await Tesseract.recognize(
+        canvas,
+        'eng',
+        {
+          logger: m => console.log(m)
+        }
+      );
+
+      document.getElementById("result").innerText = text;
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+
+</body>
+</html>
