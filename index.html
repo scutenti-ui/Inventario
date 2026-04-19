@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scanner</title>
+
+  <link rel="manifest" href="manifest.json">
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #1e3a8a;
+      color: white;
+    }
+
+    #reader {
+      width: 300px;
+      margin: 20px auto;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      background: white;
+      color: #1e3a8a;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Scanner Barcode</h1>
+
+  <div id="reader"></div>
+
+  <button onclick="startScanner()">Avvia Scanner</button>
+  <button onclick="stopScanner()">Stop</button>
+
+  <h2 id="result"></h2>
+
+  <script>
+    let scanner;
+
+    function startScanner() {
+      scanner = new Html5Qrcode("reader");
+
+      scanner.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 150 }
+        },
+        (decodedText) => {
+          document.getElementById("result").innerText = decodedText;
+          stopScanner();
+        },
+        (error) => {
+          // ignora errori continui
+        }
+      );
+    }
+
+    function stopScanner() {
+      if (scanner) {
+        scanner.stop().then(() => {
+          console.log("Scanner fermato");
+        });
+      }
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+
+</body>
+</html>
